@@ -1,6 +1,8 @@
 package gui;
 
 import application.Main;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -11,40 +13,60 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.entities.Seller;
+import model.services.SellerService;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SellerListController implements Initializable {
     
-    @FXML
-    Button btNew;
+    private SellerService service;
+    
+    private ObservableList<Seller> obsList;
     
     @FXML
-    TableView<Seller> tableViewSeller;
+    private Button btNew;
     
     @FXML
-    TableColumn<Seller, Integer> tableColumnId;
+    private TableView<Seller> tableViewSeller;
     
     @FXML
-    TableColumn<Seller, String> tableColumnName;
+    private TableColumn<Seller, Integer> tableColumnId;
     
     @FXML
-    TableColumn<Seller, String> tableColumnEmail;
+    private TableColumn<Seller, String> tableColumnName;
     
     @FXML
-    TableColumn<Seller, Date> tableColumnBirthDate;
+    private TableColumn<Seller, String> tableColumnEmail;
     
     @FXML
-    TableColumn<Seller, Double> tableColumnBaseSalary;
+    private TableColumn<Seller, Date> tableColumnBirthDate;
     
     @FXML
-    TableColumn<Seller, Department> tableColumnDepartmentName;
+    private TableColumn<Seller, Double> tableColumnBaseSalary;
+    
+    @FXML
+    private TableColumn<Seller, Department> tableColumnDepartmentName;
     
     @FXML
     public void onBtNewAction() {
         System.out.println("onBtNewAction");
+    }
+    
+    public void setSellerService(SellerService service) {
+        this.service = service;
+    }
+    
+    public void updateTableView() {
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+        } else {
+            List<Seller> list = service.findAll();
+            obsList = FXCollections.observableArrayList(list);
+            tableViewSeller.setItems(obsList);
+        }
     }
     
     @Override

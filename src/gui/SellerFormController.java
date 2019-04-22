@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import model.entities.Seller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -58,6 +59,32 @@ public class SellerFormController implements Initializable {
     @FXML
     private Label labelErrorDepartmentName;
     //endregion
+    
+    private Seller entity;
+    
+    public void setSeller(Seller entity) {
+        this.entity = entity;
+    }
+    
+    public void updateFormData() {
+        if (entity == null) {
+            throw new IllegalStateException("Entity was null");
+        } else {
+            txtId.setText(String.valueOf(entity.getId()));
+            txtName.setText(entity.getName());
+            txtEmail.setText(entity.getEmail());
+            
+            if (entity.getBirthDate() != null) {
+                txtBirthdate.setText(String.valueOf(entity.getBirthDate()));
+            }
+            
+            txtBaseSalary.setText(String.valueOf(entity.getBaseSalary()));
+            
+            if (entity.getDepartment() != null) {
+                txtDepartmentName.setText(entity.getDepartment().getName());
+            }
+        }
+    }
     
     @FXML
     public void onBtSaveAction() {

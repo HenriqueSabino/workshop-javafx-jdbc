@@ -8,7 +8,7 @@ import java.util.List;
 
 public class SellerService {
     
-    SellerDao sellerDao = DaoFactory.createSellerDao();
+    private SellerDao sellerDao = DaoFactory.createSellerDao();
     
     public List<Seller> findAll() {
         return sellerDao.findAll();

@@ -14,6 +14,10 @@ public class DepartmentService {
         return departmentDao.findAll();
     }
     
+    public Department findByName(String name) {
+        return departmentDao.findByName(name);
+    }
+    
     public void savaOrUpdate(Department department) {
         if (department.getId() == null) {
             departmentDao.insert(department);

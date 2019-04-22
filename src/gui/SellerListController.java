@@ -17,10 +17,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.entities.Seller;
+import model.services.DepartmentService;
 import model.services.SellerService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -88,6 +90,7 @@ public class SellerListController implements Initializable {
         tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
         tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
         initializeDepartmentNameColumn();
+        initializeBirthDateColumn();
         
         Stage mainStage = (Stage) Main.getMainScene().getWindow();
         tableViewSeller.prefHeightProperty().bind(mainStage.heightProperty());
@@ -112,6 +115,23 @@ public class SellerListController implements Initializable {
         });
     }
     
+    private void initializeBirthDateColumn() {
+        tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+        
+        tableColumnBirthDate.setCellFactory(param -> new TableCell<>() {
+            private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            
+            @Override
+            public void updateItem(Date date, boolean empty) {
+                if (date == null) {
+                    setText(null);
+                } else {
+                    setText(sdf.format(date));
+                }
+            }
+        });
+    }
+    
     private void createDialogForm(Seller seller, String absoluteName, Stage parentStage) {
         try {
             
@@ -120,6 +140,8 @@ public class SellerListController implements Initializable {
             
             SellerFormController controller = loader.getController();
             controller.setSeller(seller);
+            controller.setSellerService(new SellerService());
+            controller.setDepartmentService(new DepartmentService());
             controller.updateFormData();
             
             Stage dialogStage = new Stage();

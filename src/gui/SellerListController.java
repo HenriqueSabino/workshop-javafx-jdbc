@@ -1,6 +1,7 @@
 package gui;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -27,7 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class SellerListController implements Initializable {
+public class SellerListController implements Initializable, DataChangeListener {
     
     private SellerService service;
     
@@ -143,6 +144,7 @@ public class SellerListController implements Initializable {
             controller.setSellerService(new SellerService());
             controller.setDepartmentService(new DepartmentService());
             controller.updateFormData();
+            controller.subscribeDataChangeListener(this);
             
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Enter seller data");
@@ -156,5 +158,10 @@ public class SellerListController implements Initializable {
         } catch (IOException e) {
             Alerts.showAlert("IOException", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
         }
+    }
+    
+    @Override
+    public void onDataChanged() {
+        updateTableView();
     }
 }

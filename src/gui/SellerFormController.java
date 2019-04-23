@@ -1,5 +1,6 @@
 package gui;
 
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -19,6 +20,8 @@ import model.services.SellerService;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SellerFormController implements Initializable {
@@ -74,6 +77,7 @@ public class SellerFormController implements Initializable {
     private SellerService sellerService;
     private DepartmentService departmentService;
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
     
     public void setSeller(Seller entity) {
         this.entity = entity;
@@ -119,7 +123,7 @@ public class SellerFormController implements Initializable {
         try {
             entity = getFormData();
             sellerService.saveOrUpdate(entity);
-            
+            notifyDataChangeListeners();
             Utils.currentStage(event).close();
         } catch (RuntimeException e) {
             Alerts.showAlert("Error saving object", null, e.getMessage(), Alert.AlertType.ERROR);
@@ -163,5 +167,13 @@ public class SellerFormController implements Initializable {
         Constraints.setTextFieldMaxLength(txtName, 30);
         Constraints.setTextFieldMaxLength(txtEmail, 50);
         Constraints.setTextFieldDouble(txtBaseSalary);
+    }
+    
+    public void subscribeDataChangeListener(DataChangeListener listener) {
+        dataChangeListeners.add(listener);
+    }
+    
+    private void notifyDataChangeListeners() {
+        dataChangeListeners.forEach(DataChangeListener::onDataChanged);
     }
 }

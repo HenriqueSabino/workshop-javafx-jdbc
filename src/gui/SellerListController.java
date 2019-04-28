@@ -1,9 +1,11 @@
 package gui;
 
 import application.Main;
+import db.DbIntegrityException;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,6 +28,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class SellerListController implements Initializable, DataChangeListener {
@@ -59,6 +62,12 @@ public class SellerListController implements Initializable, DataChangeListener {
     private TableColumn<Seller, Department> tableColumnDepartmentName;
     
     @FXML
+    private TableColumn<Seller, Seller> tableColumnEDIT;
+    
+    @FXML
+    private TableColumn<Seller, Seller> tableColumnREMOVE;
+    
+    @FXML
     public void onBtNewAction(ActionEvent event) {
         Stage stage = Utils.currentStage(event);
         Seller seller = new Seller();
@@ -76,6 +85,8 @@ public class SellerListController implements Initializable, DataChangeListener {
             List<Seller> list = service.findAll();
             obsList = FXCollections.observableArrayList(list);
             tableViewSeller.setItems(obsList);
+            initializeEditButtons();
+            initializeRemoveButtons();
         }
     }
     
@@ -92,6 +103,8 @@ public class SellerListController implements Initializable, DataChangeListener {
         tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
         initializeDepartmentNameColumn();
         initializeBirthDateColumn();
+        initializeEditButtons();
+        initializeRemoveButtons();
         
         Stage mainStage = (Stage) Main.getMainScene().getWindow();
         tableViewSeller.prefHeightProperty().bind(mainStage.heightProperty());
@@ -133,6 +146,59 @@ public class SellerListController implements Initializable, DataChangeListener {
         });
     }
     
+    private void initializeEditButtons() {
+        tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnEDIT.setCellFactory(param -> new TableCell<>() {
+            private final Button button = new Button("edit");
+            
+            @Override
+            protected void updateItem(Seller obj, boolean empty) {
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+                setGraphic(button);
+                button.setOnAction(event ->
+                        createDialogForm(obj, "/gui/SellerForm.fxml", Utils.currentStage(event)));
+                
+            }
+        });
+    }
+    
+    private void initializeRemoveButtons() {
+        tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnREMOVE.setCellFactory(param -> new TableCell<>() {
+            Button button = new Button("remove");
+            
+            @Override
+            protected void updateItem(Seller obj, boolean empty) {
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+                
+                setGraphic(button);
+                button.setOnAction(event -> removeEntity(obj));
+            }
+        });
+    }
+    
+    private void removeEntity(Seller obj) {
+        Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
+        
+        if (result.get() == ButtonType.OK) {
+            if (service == null) {
+                throw new IllegalStateException("Service was null");
+            }
+            try {
+                service.remove(obj);
+                updateTableView();
+            } catch (DbIntegrityException e) {
+                Alerts.showAlert("Error removing object", null, e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+    
     private void createDialogForm(Seller seller, String absoluteName, Stage parentStage) {
         try {
             
@@ -156,6 +222,7 @@ public class SellerListController implements Initializable, DataChangeListener {
             dialogStage.showAndWait();
             
         } catch (IOException e) {
+            e.printStackTrace();
             Alerts.showAlert("IOException", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
         }
     }
